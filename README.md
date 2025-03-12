@@ -9,3 +9,9 @@ How to Use
 Place the Excel file (NVIDIA Stock Price History.xlsx) in the same folder as the script.
 Run the script using:
 
+## Packages to work with:
+
+- Pandas
+- Numpy
+- matplolib
+- ...
