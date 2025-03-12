@@ -3,7 +3,9 @@ This script reads NVIDIA stock price data from an Excel file and generates a tim
 
 Requirements
 Make sure you have the following Python libraries installed:
+```
 pip install pandas matplotlib openpyxl
+```
 
 How to Use
 Place the Excel file (NVIDIA Stock Price History.xlsx) in the same folder as the script.
