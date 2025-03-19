@@ -2,8 +2,29 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Data process
+WORK_DAYS_OER_YEAR = 252
 
+# Rewrite it using OOP
+
+class TAchnicalAnalysis:
+
+    def load(filename(stockname)):
+        pass
+
+    def calculate():
+        pass
+
+    def clean(self):
+        pass
+
+    def plot(self, params):
+        pass
+
+    def backtest(self):
+        pass
+
+
+# Data process
 def load_data(file_path):
     df = pd.read_excel(file_path)
     df['Date'] = pd.to_datetime(df['Date'])
@@ -92,10 +113,10 @@ def backtest_strategy(df, initial_cash=10000):
     df['Portfolio_Value'] = portfolio_value[:len(df)]
     # Compute Performance Metrics
     total_return = (df['Portfolio_Value'].iloc[-1] - initial_cash) / initial_cash
-    annualized_return = (1 + np.mean(returns)) ** 252 - 1
-    sharpe_ratio = np.mean(returns) / np.std(returns) * np.sqrt(252) if np.std(returns) != 0 else 0
+    annualized_return = (1 + np.mean(returns)) ** WORK_DAYS_OER_YEAR - 1
+    sharpe_ratio = np.mean(returns) / np.std(returns) * np.sqrt(WORK_DAYS_OER_YEAR) if np.std(returns) != 0 else 0
     max_drawdown = np.max((np.maximum.accumulate(df['Portfolio_Value']) - df['Portfolio_Value']) / np.maximum.accumulate(df['Portfolio_Value']))
-    volatility = np.std(returns) * np.sqrt(252)
+    volatility = np.std(returns) * np.sqrt(WORK_DAYS_OER_YEAR)
     # Print results
     print(f"Final Portfolio Value: ${df['Portfolio_Value'].iloc[-1]:.2f}")
     print(f"Total Return: {total_return:.2%}")
@@ -105,7 +126,9 @@ def backtest_strategy(df, initial_cash=10000):
     print(f"Volatility: {volatility:.2%}")
     return df
 
-# Visualization 
+# Visualization
+
+def plot(df, params, candlstik=False)
 
 def plot_price_trend(df):
     plt.figure(figsize=(36, 12))
@@ -169,22 +192,29 @@ def plot_candlestick_patterns(df):
 
 # Main Function
 def main():
-    file_path = "NVIDIA Stock Price History.xlsx"
-    df = load_data(file_path)
-    df = calculate_moving_averages(df)
-    df = calculate_macd(df)
-    df = calculate_rsi(df)
-    df = detect_bullish_engulfing(df)
-    df = detect_bearish_engulfing(df)
-    df = detect_doji(df)
-    df = generate_trade_signals(df)
-    df = backtest_strategy(df)
+    STOCKS_LIST = ["NVIDIA Stock Price History.xlsx", ...]
 
-    plot_price_trend(df)
-    plot_macd(df)
-    plot_rsi(df)
-    plot_candlestick_patterns(df)
-    plot_portfolio_performance(df)
+    for stock in STOCKS_LIST:
+        file_path = stock
+        df = load_data(file_path)
+
+        df = calculate_moving_averages(df)
+        df = calculate_macd(df)
+        df = calculate_rsi(df)
+
+        df = detect_bullish_engulfing(df)
+        df = detect_bearish_engulfing(df)
+        df = detect_doji(df)
+
+        df = generate_trade_signals(df)
+
+        df = backtest_strategy(df)
+
+        plot_price_trend(df)
+        plot_macd(df)
+        plot_rsi(df)
+        plot_candlestick_patterns(df)
+        plot_portfolio_performance(df)
 
 if __name__ == "__main__":
     main()
