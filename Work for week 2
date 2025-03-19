@@ -1,0 +1,190 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Data process
+
+def load_data(file_path):
+    df = pd.read_excel(file_path)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df = df.sort_values(by='Date')
+    def convert_volume(value):
+        if pd.isna(value):  
+            return 0
+        if isinstance(value, str):
+            if 'M' in value:
+                return float(value.replace('M', '')) * 1e6
+            elif 'B' in value:
+                return float(value.replace('B', '')) * 1e9
+        return float(value)
+    df['Volume'] = df['Vol.'].apply(convert_volume)
+    return df
+
+# Technical Analysis
+
+def calculate_moving_averages(df, short_window=7, long_window=30):
+    df[f'SMA_{short_window}'] = df['Price'].rolling(window=short_window).mean()
+    df[f'SMA_{long_window}'] = df['Price'].rolling(window=long_window).mean()
+    return df
+
+def calculate_macd(df):
+    df['EMA_12'] = df['Price'].ewm(span=12, adjust=False).mean()
+    df['EMA_26'] = df['Price'].ewm(span=26, adjust=False).mean()
+    df['MACD'] = df['EMA_12'] - df['EMA_26']
+    df['Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
+    return df
+
+def calculate_rsi(df, period=14):
+    delta = df['Price'].diff()
+    gain = delta.where(delta > 0, 0).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    rs = gain / loss
+    df['RSI'] = 100 - (100 / (1 + rs))
+    return df
+
+# From Japanese Candlestick Charting Techniques
+
+def detect_bullish_engulfing(df):
+    condition = (df['Price'].shift(1) > df['Open'].shift(1)) & \
+                (df['Price'] > df['Open']) & \
+                (df['Open'] < df['Price'].shift(1)) & \
+                (df['Price'] > df['Open'].shift(1))
+    df['Bullish_Engulfing'] = condition
+    return df
+
+def detect_bearish_engulfing(df):
+    condition = (df['Price'].shift(1) < df['Open'].shift(1)) & \
+                (df['Price'] < df['Open']) & \
+                (df['Open'] > df['Price'].shift(1)) & \
+                (df['Price'] < df['Open'].shift(1))
+    df['Bearish_Engulfing'] = condition
+    return df
+
+def generate_trade_signals(df, short_window=7, long_window=30):
+    sma_signal = df[f'SMA_{short_window}'] > df[f'SMA_{long_window}']
+    macd_signal = df['MACD'] > df['Signal']
+    rsi_signal = df['RSI'] < 30  
+    bullish_signal = df['Bullish_Engulfing']
+    bearish_signal = df['Bearish_Engulfing']
+    doji_signal = df['Doji']
+    df['Buy_Signal'] = sma_signal | macd_signal | bullish_signal | rsi_signal
+    df['Sell_Signal'] = (~df['Buy_Signal']) | bearish_signal
+    return df
+
+def backtest_strategy(df, initial_cash=10000):
+    cash = initial_cash
+    shares = 0  
+    portfolio_value = [initial_cash]  
+    returns = []  
+    for i in range(len(df)):  
+        price = df.iloc[i]['Price']
+        if df.iloc[i]['Buy_Signal'] and cash > 0:  
+            shares = cash / price  
+            cash = 0  
+        elif df.iloc[i]['Sell_Signal'] and shares > 0:  
+            cash = shares * price  
+            shares = 0  
+        total_value = cash + (shares * price)  
+        portfolio_value.append(total_value)
+        if len(portfolio_value) > 1 and portfolio_value[-2] > 0:
+            daily_return = (portfolio_value[-1] - portfolio_value[-2]) / portfolio_value[-2]
+            returns.append(daily_return)
+    df['Portfolio_Value'] = portfolio_value[:len(df)]
+    # Compute Performance Metrics
+    total_return = (df['Portfolio_Value'].iloc[-1] - initial_cash) / initial_cash
+    annualized_return = (1 + np.mean(returns)) ** 252 - 1
+    sharpe_ratio = np.mean(returns) / np.std(returns) * np.sqrt(252) if np.std(returns) != 0 else 0
+    max_drawdown = np.max((np.maximum.accumulate(df['Portfolio_Value']) - df['Portfolio_Value']) / np.maximum.accumulate(df['Portfolio_Value']))
+    volatility = np.std(returns) * np.sqrt(252)
+    # Print results
+    print(f"Final Portfolio Value: ${df['Portfolio_Value'].iloc[-1]:.2f}")
+    print(f"Total Return: {total_return:.2%}")
+    print(f"Annualized Return: {annualized_return:.2%}")
+    print(f"Sharpe Ratio: {sharpe_ratio:.2f}")
+    print(f"Maximum Drawdown: {max_drawdown:.2%}")
+    print(f"Volatility: {volatility:.2%}")
+    return df
+
+# Visualization 
+
+def plot_price_trend(df):
+    plt.figure(figsize=(36, 12))
+    plt.plot(df['Date'], df['Price'], label='Price', color='black')
+    plt.scatter(df['Date'][df['Buy_Signal']], df['Price'][df['Buy_Signal']], marker='^', color='green', label='Buy Signal')
+    plt.scatter(df['Date'][df['Sell_Signal']], df['Price'][df['Sell_Signal']], marker='v', color='red', label='Sell Signal')
+    plt.title("Stock Price with Buy/Sell Signals")
+    plt.legend()
+    plt.show()
+
+def plot_macd(df):
+    plt.figure(figsize=(12, 4))
+    plt.plot(df['Date'], df['MACD'], label='MACD', color='blue')
+    plt.plot(df['Date'], df['Signal'], label='Signal Line', color='red')
+    plt.axhline(0, color='gray', linestyle='dashed')
+    plt.title("MACD Indicator")
+    plt.legend()
+    plt.show()
+
+def plot_rsi(df):
+    plt.figure(figsize=(12, 4))
+    plt.plot(df['Date'], df['RSI'], label='RSI', color='purple')
+    plt.axhline(70, color='red', linestyle='dashed', label='Overbought')
+    plt.axhline(30, color='green', linestyle='dashed', label='Oversold')
+    plt.title("RSI Indicator")
+    plt.legend()
+    plt.show()
+
+def plot_portfolio_performance(df):
+    plt.figure(figsize=(12, 6))
+    plt.plot(df['Date'], df['Portfolio_Value'], label='Portfolio Value', color='blue')
+    plt.title("Portfolio Performance Over Time")
+    plt.xlabel("Date")
+    plt.ylabel("Portfolio Value ($)")
+    plt.legend()
+    plt.show()
+
+def plot_candlestick_patterns(df):
+    plt.figure(figsize=(12, 6))
+    for i in range(len(df)):
+        date = df.iloc[i]['Date']
+        open_ = df.iloc[i]['Open']
+        close = df.iloc[i]['Price']
+        high = df.iloc[i]['High']
+        low = df.iloc[i]['Low']
+        color = 'green' if close > open_ else 'red'  
+        plt.bar(date, abs(close - open_), bottom=min(open_, close), color=color, width=0.5)
+        plt.vlines(date, low, high, color=color, linewidth=1)
+        
+    plt.scatter(df['Date'][df['Bullish_Engulfing']], 
+                df['High'][df['Bullish_Engulfing']] * 1.01, 
+                label='Bullish Engulfing', color='lime', s=100)
+    plt.scatter(df['Date'][df['Bearish_Engulfing']], 
+                df['Low'][df['Bearish_Engulfing']] * 0.99, 
+                label='Bearish Engulfing', color='red', s=100)
+    plt.xlabel("Date")
+    plt.ylabel("Price")
+    plt.title("Candlestick Pattern Detection")
+    plt.legend()
+    plt.show()
+
+# Main Function
+def main():
+    file_path = "NVIDIA Stock Price History.xlsx"
+    df = load_data(file_path)
+    df = calculate_moving_averages(df)
+    df = calculate_macd(df)
+    df = calculate_rsi(df)
+    df = detect_bullish_engulfing(df)
+    df = detect_bearish_engulfing(df)
+    df = detect_doji(df)
+    df = generate_trade_signals(df)
+    df = backtest_strategy(df)
+
+    plot_price_trend(df)
+    plot_macd(df)
+    plot_rsi(df)
+    plot_candlestick_patterns(df)
+    plot_portfolio_performance(df)
+
+if __name__ == "__main__":
+    main()
