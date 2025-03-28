@@ -75,28 +75,23 @@ This project implements an Object-Oriented Programming (OOP) approach to technic
 - `XGBRegressor` or `LGBMRegressor`
 - Controlled via `MODEL_TYPE` parameter
 
-### Workflow:
-1. In-sample data split by `IN_SAMPLE_START` ~ `IN_SAMPLE_END`
-2. Train tree model on signal→future return relation
-3. Predict on `OUT_SAMPLE_START` ~ `OUT_SAMPLE_END`
-4. If `USE_TREE=True`, ML signal contributes to Buy/Sell condition
-5. Use traditional or hybrid signals in `backtest()` to simulate strategy performance
-
 ---
 
-## Flexibility and Extensibility
-- Modular class allows easy integration of new indicators or ML models
-- Constants (thresholds, windows, etc.) are parameterized for tuning
-- `USE_TREE` toggle gives full control over strategy logic
+## Flowchart:
+flowchart TD
+    A[Start] --> B[Load CSV Data]
+    B --> C[Calculate Technical Indicators]
+    C --> D[Generate Buy/Sell Signals]
+    D --> E{USE_TREE?}
 
----
+    E -- No --> F[Backtest with Traditional Signals]
+    F --> Z[End]
 
-## Future Suggestions
-- Extend to multi-class prediction (Buy/Hold/Sell)
-- Integrate Explainable AI (e.g. SHAP) for model interpretation
-- Add cross-validation and hyperparameter tuning
-- Export predictions and performance as reports or dashboards
-
----
+    E -- Yes --> G[Split In-sample / Out-sample Data]
+    G --> H[Train Tree Model (XGBoost / LightGBM)]
+    H --> I[Predict ML Buy/Sell Signals]
+    I --> J[Combine ML & Traditional Signals]
+    J --> K[Backtest on Out-sample Data]
+    K --> Z
 
 ## End
