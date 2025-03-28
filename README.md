@@ -78,20 +78,40 @@ This project implements an Object-Oriented Programming (OOP) approach to technic
 ---
 
 ## Flowchart:
-flowchart TD
-    A[Start] --> B[Load CSV Data]
-    B --> C[Calculate Technical Indicators]
-    C --> D[Generate Buy/Sell Signals]
-    D --> E{USE_TREE?}
 
-    E -- No --> F[Backtest with Traditional Signals]
-    F --> Z[End]
+Start
+ |
+ v
+[Load CSV Data]
+ |
+ v
+[Calculate Indicators: SMA, EMA, MACD, RSI, Patterns]
+ |
+ v
+[Generate Traditional Buy/Sell Signals]
+ |
+ v
+[USE_TREE?] --> No --> [Backtest with Traditional Signals] --> End
+ |
+Yes
+ |
+ v
+[Split In-sample / Out-sample Data]
+ |
+ v
+[Train Tree Model (XGBoost / LightGBM)]
+ |
+ v
+[Predict ML Buy/Sell Signals on Out-sample]
+ |
+ v
+[Combine Traditional + ML Signals]
+ |
+ v
+[Backtest on Out-sample Data]
+ |
+ v
+End
 
-    E -- Yes --> G[Split In-sample / Out-sample Data]
-    G --> H[Train Tree Model (XGBoost / LightGBM)]
-    H --> I[Predict ML Buy/Sell Signals]
-    I --> J[Combine ML & Traditional Signals]
-    J --> K[Backtest on Out-sample Data]
-    K --> Z
 
 ## End
