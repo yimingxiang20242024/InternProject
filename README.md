@@ -27,7 +27,6 @@ This project implements an Object-Oriented Programming (OOP) approach to technic
 
 ## UML Class Design (Abstracted)
 
-```text
 ```mermaid
 classDiagram
     class TechnicalAnalysis {
@@ -46,7 +45,6 @@ classDiagram
     }
 ```
 
-```
 
 ---
 
