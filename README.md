@@ -79,39 +79,19 @@ classDiagram
 
 ## Flowchart:
 
-Start
- |
- v
-[Load CSV Data]
- |
- v
-[Calculate Indicators: SMA, EMA, MACD, RSI, Patterns]
- |
- v
-[Generate Traditional Buy/Sell Signals]
- |
- v
-[USE_TREE?] --> No --> [Backtest with Traditional Signals] --> End
- |
-Yes
- |
- v
-[Split In-sample / Out-sample Data]
- |
- v
-[Train Tree Model (XGBoost / LightGBM)]
- |
- v
-[Predict ML Buy/Sell Signals on Out-sample]
- |
- v
-[Combine Traditional + ML Signals]
- |
- v
-[Backtest on Out-sample Data]
- |
- v
-End
+```mermaid
+flowchart TD
+    A[Start: Load CSV Data] --> B[Calculate Indicators]
+    B --> C[Generate Signals]
+    C --> D{Use ML Model?}
+    D -- No --> E[Backtest with Buy/Sell Signals]
+    D -- Yes --> F[Train Tree Model]
+    F --> G[Predict ML Signals]
+    G --> H[Backtest with Combined Signals]
+    E --> I[Plot Results]
+    H --> I
+    I --> Z[End]
+```
 
 
 ## End
