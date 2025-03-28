@@ -28,22 +28,24 @@ This project implements an Object-Oriented Programming (OOP) approach to technic
 ## UML Class Design (Abstracted)
 
 ```text
-+-----------------------+
-|  TechnicalAnalysis    |
-+-----------------------+
-| - file_path           |
-| - df                  |
-| - model               |
-+-----------------------+
-| +load_data()          |
-| +calculate_indicators()|
-| +generate_signals()   |
-| +train_tree_model()   |
-| +predict_tree_signal()|
-| +backtest()           |
-| +backtest_model_predictions()|
-| +plot(kind)           |
-+-----------------------+
+```mermaid
+classDiagram
+    class TechnicalAnalysis {
+        - file_path: str
+        - df: pd.DataFrame
+        - model: Any
+
+        + load_data(): pd.DataFrame
+        + calculate_indicators(short_window, long_window, ema_fast, ema_slow, macd_signal): void
+        + generate_signals(short_window, long_window): void
+        + train_tree_model(model_type, in_start, in_end): void
+        + predict_tree_signal(out_start, out_end): void
+        + backtest(initial_cash, start_date, end_date): void
+        + backtest_model_predictions(out_start, out_end): void
+        + plot(kind, start_date, end_date): void
+    }
+```
+
 ```
 
 ---
