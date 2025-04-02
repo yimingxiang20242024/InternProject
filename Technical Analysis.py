@@ -224,6 +224,7 @@ class TechnicalAnalysis:
         plt.legend()
         plt.show()
 
+        self.df = df
 
     def backtest_model_predictions(self, out_start, out_end):
         if USE_TREE:
