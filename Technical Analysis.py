@@ -79,51 +79,25 @@ class TechnicalAnalysis:
     def generate_signals(self, short_window= SHORT_WINDOW, long_window=LONG_WINDOW):
         df = self.df
 
-        df['sma_buy'] = df[f'SMA_{short_window}'] > df[f'SMA_{long_window}']
-        df['macd_buy'] = df['MACD'] > df['Signal']
-        df['rsi_buy'] = df['RSI'] < RSI_OVERSOLD_THRESHOLD
-        df['bullish'] = df['Bullish_Engulfing']
-        df['sma_sell'] = df[f'SMA_{short_window}'] < df[f'SMA_{long_window}']
-        df['macd_sell'] = df['MACD'] < df['Signal']
-        df['rsi_sell'] = df['RSI'] > RSI_OVERBOUGHT_THRESHOLD
-        df['bearish'] = df['Bearish_Engulfing']
-
-        df['Buy_Signal'] = (df[['sma_buy', 'macd_buy', 'rsi_buy', 'bullish']].sum(axis=1) >= BUY_SIGNAL_THRESHOLD)
-        df['Sell_Signal'] = (~df['Buy_Signal']) & (df[['sma_sell', 'macd_sell', 'rsi_sell', 'bearish']].sum(axis=1) >= SELL_SIGNAL_THRESHOLD)
-
-        df['ML_Buy_Signal'] = False
-        df['ML_Sell_Signal'] = False
-
-    def train_tree_model(self, model_type='xgboost', in_start=None, in_end=None):
-        df = self.df.copy()
-        df = df.set_index('Date')
-        data = df.loc[in_start:in_end].copy()
-
-        features = ['sma_buy', 'macd_buy', 'rsi_buy', 'bullish', 'sma_sell', 'macd_sell', 'rsi_sell', 'bearish']
-        X = data[features].shift(1).bfill().astype(int)
-        y = (data['Price'].diff().shift(-1) > 0).astype(int)
-
-        X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
-
-        if model_type == 'xgboost':
-            self.model = XGBRegressor()
-        else:
-            self.model = LGBMRegressor()
-
-        self.model.fit(X_train, y_train)
-
-    def predict_tree_signal(self, out_start, out_end):
-        df = self.df.copy()
-        df = df.set_index('Date')
-        data = df.loc[out_start:out_end].copy()
-
-        features = ['sma_buy', 'macd_buy', 'rsi_buy', 'bullish', 'sma_sell', 'macd_sell', 'rsi_sell', 'bearish']
-        X_out = data[features].astype(int)
-        preds = self.model.predict(X_out)
-        pred_index = data.index
-
-        self.df.loc[self.df['Date'].isin(pred_index), 'ML_Buy_Signal'] = preds > 0.5
-        self.df.loc[self.df['Date'].isin(pred_index), 'ML_Sell_Signal'] = preds <= 0.5
+        prev_macd = df['MACD'].shift(1)
+        prev_macd_signal = df['MACD_Signal'].shift(1)
+        macd_cross = np.where((df['MACD'] > df['MACD_Signal']) & (prev_macd <= prev_macd_signal), 1,
+                              np.where((df['MACD'] < df['MACD_Signal']) & (prev_macd >= prev_macd_signal), -1, 0))
+        
+        prev_sma_short = df[f'SMA_{short_window}'].shift(1)
+        prev_sma_long = df[f'SMA_{long_window}'].shift(1)
+        sma_cross = np.where((df[f'SMA_{short_window}'] > df[f'SMA_{long_window}']) & (prev_sma_short <= prev_sma_long), 1,
+                             np.where((df[f'SMA_{short_window}'] < df[f'SMA_{long_window}']) & (prev_sma_short >= prev_sma_long), -1, 0))
+        
+        prev_rsi = df['RSI'].shift(1)
+        rsi_cross = np.where((df['RSI'] > 50) & (prev_rsi <= 50), 1,
+                             np.where((df['RSI'] < 50) & (prev_rsi >= 50), -1, 0))
+        
+        df['Signal'] = np.where(macd_cross != 0, macd_cross,
+                         np.where(sma_cross != 0, sma_cross,
+                         np.where(rsi_cross != 0, rsi_cross, 0)))
+        df['Signal'] = df['Signal'].replace(to_replace=0, method='ffill')
+        df['Signal_Change'] = df['Signal'].diff().fillna(0)
 
     def backtest(self, initial_cash=INITIAL_CASH, start_date=None, end_date=None):
         df = self.df.copy()
