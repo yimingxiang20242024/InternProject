@@ -144,8 +144,6 @@ class TechnicalAnalysis:
 
         buy_signal = df['Buy_Signal'].shift(1).ffill().astype(bool)
         sell_signal = df['Sell_Signal'].shift(1).ffill().astype(bool)
-        print(buy_signal)
-        print(sell_signal)
         if USE_TREE:
             ml_buy_signal = df['ML_Buy_Signal'].shift(1).infer_objects(copy=False).bfill().astype(bool)
             ml_sell_signal = df['ML_Sell_Signal'].shift(1).infer_objects(copy=False).bfill().astype(bool)
