@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from xgboost import XGBRegressor
@@ -52,6 +53,67 @@ class TechnicalAnalysis:
         df['Volume'] = df['Vol.'].apply(convert_volume)
         return df
 
+
+    def evaluate_strategy_results(self, initial_cash=INITIAL_CASH, filename_prefix="result", output_path="."):
+        df = self.df.copy()
+    
+        # --- Buy & Hold baseline ---
+        price_start = df['Price'].iloc[0]
+        price_end = df['Price'].iloc[-1]
+        buy_hold_value = initial_cash * (price_end / price_start)
+        buy_hold_return = (buy_hold_value - initial_cash) / initial_cash
+        buy_hold_returns = df['Price'].pct_change().dropna().values
+        buy_hold_annualized = (1 + np.mean(buy_hold_returns)) ** WORK_DAYS_PER_YEAR - 1
+        buy_hold_sharpe = np.mean(buy_hold_returns) / np.std(buy_hold_returns) * np.sqrt(WORK_DAYS_PER_YEAR)
+        buy_hold_volatility = np.std(buy_hold_returns) * np.sqrt(WORK_DAYS_PER_YEAR)
+        bh_cum = (df['Price'] / price_start) * initial_cash
+        buy_hold_drawdown = np.max((np.maximum.accumulate(bh_cum) - bh_cum) / np.maximum.accumulate(bh_cum))
+    
+        # --- Strategy metrics ---
+        strat_value = df['Portfolio_Value'].iloc[-1]
+        strat_return = (strat_value - initial_cash) / initial_cash
+        strategy_returns = df['Portfolio_Value'].pct_change().dropna().values
+        strategy_annualized = (1 + np.mean(strategy_returns)) ** WORK_DAYS_PER_YEAR - 1
+        strategy_sharpe = np.mean(strategy_returns) / np.std(strategy_returns) * np.sqrt(WORK_DAYS_PER_YEAR)
+        strategy_volatility = np.std(strategy_returns) * np.sqrt(WORK_DAYS_PER_YEAR)
+        strategy_drawdown = np.max((np.maximum.accumulate(df['Portfolio_Value']) - df['Portfolio_Value']) / np.maximum.accumulate(df['Portfolio_Value']))
+    
+        # --- Prepare output directory ---
+        stock_dir = os.path.join(output_path, filename_prefix)
+        os.makedirs(stock_dir, exist_ok=True)
+    
+        # --- Save metrics to CSV ---
+        summary = {
+            "Final Portfolio Value": strat_value,
+            "Strategy Total Return": strat_return,
+            "Strategy Annualized Return": strategy_annualized,
+            "Strategy Sharpe Ratio": strategy_sharpe,
+            "Strategy Volatility": strategy_volatility,
+            "Strategy Max Drawdown": strategy_drawdown,
+            "Buy&Hold Value": buy_hold_value,
+            "Buy&Hold Return": buy_hold_return,
+            "Buy&Hold Annualized": buy_hold_annualized,
+            "Buy&Hold Sharpe": buy_hold_sharpe,
+            "Buy&Hold Volatility": buy_hold_volatility,
+            "Buy&Hold Max Drawdown": buy_hold_drawdown,
+        }
+    
+        df_summary = pd.DataFrame([summary])
+        df_summary.to_csv(os.path.join(stock_dir, f"{filename_prefix}_metrics.csv"), index=False)
+    
+        # --- Plot comparison ---
+        plt.figure(figsize=(12, 6))
+        plt.plot(df['Date'], df['Portfolio_Value'], label='Strategy Portfolio', color='blue')
+        plt.plot(df['Date'], bh_cum, label='Buy & Hold', linestyle='--', color='gray')
+        plt.title(f"{filename_prefix.capitalize()} - Portfolio Comparison")
+        plt.xlabel("Date")
+        plt.ylabel("Value ($)")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(os.path.join(stock_dir, f"{filename_prefix}_comparison.png"))
+        plt.close()
+
+    
     def calculate_indicators(self, short_window=SHORT_WINDOW, long_window=LONG_WINDOW, 
                              ema_fast=EMA_FAST_SPAN, ema_slow=EMA_SLOW_SPAN, macd_signal=MACD_SIGNAL_SPAN):
         df = self.df
@@ -225,77 +287,29 @@ class TechnicalAnalysis:
         plt.show()
 
         self.df = df
-
+    
     def backtest_model_predictions(self, out_start, out_end):
         if USE_TREE:
             self.predict_tree_signal(out_start, out_end)
         self.backtest(start_date=out_start, end_date=out_end)
-
-    def plot(self, kind, start_date=OUT_SAMPLE_START, end_date=OUT_SAMPLE_END):
-        df = self.df.copy()
-        df = df[(df['Date'] >= start_date) & (df['Date'] <= end_date)]
-        plt.figure(figsize=(36, 12) if kind == 'price' else (12, 6))
-
-        if kind == 'price':
-            plt.plot(df['Date'], df['Price'], label='Price', color='black')
-            plt.scatter(df['Date'][df['Buy_Signal']], df['Price'][df['Buy_Signal']], marker='^', color='green', label='Buy Signal')
-            plt.scatter(df['Date'][df['Sell_Signal']], df['Price'][df['Sell_Signal']], marker='v', color='red', label='Sell Signal')
-            plt.title("Stock Price with Buy/Sell Signals")
-
-        elif kind == 'macd':
-            plt.plot(df['Date'], df['MACD'], label='MACD', color='blue')
-            plt.plot(df['Date'], df['Signal'], label='Signal Line', color='red')
-            plt.axhline(0, color='gray', linestyle='dashed')
-            plt.title("MACD Indicator")
-
-        elif kind == 'rsi':
-            plt.plot(df['Date'], df['RSI'], label='RSI', color='purple')
-            plt.axhline(70, color='red', linestyle='dashed', label='Overbought')
-            plt.axhline(30, color='green', linestyle='dashed', label='Oversold')
-            plt.title("RSI Indicator")
-
-        elif kind == 'candlestick':
-            for i in range(len(df)):
-                date = df.iloc[i]['Date']
-                open_ = df.iloc[i]['Open']
-                close = df.iloc[i]['Price']
-                high = df.iloc[i]['High']
-                low = df.iloc[i]['Low']
-                color = 'green' if close > open_ else 'red'
-                plt.bar(date, abs(close - open_), bottom=min(open_, close), color=color, width=0.5)
-                plt.vlines(date, low, high, color=color, linewidth=1)
-            plt.scatter(df['Date'][df['Bullish_Engulfing']], df['High'][df['Bullish_Engulfing']] * 1.01, label='Bullish Engulfing', color='lime', s=100)
-            plt.scatter(df['Date'][df['Bearish_Engulfing']], df['Low'][df['Bearish_Engulfing']] * 0.99, label='Bearish Engulfing', color='red', s=100)
-            plt.xlabel("Date")
-            plt.ylabel("Price")
-            plt.title("Candlestick Pattern Detection")
-
-        plt.legend()
-        plt.show()
-
-        
         
 if __name__ == "__main__":
-    #Amazon.com Stock Price History.csv
-    #NVIDIA Stock Price History.csv
-    #AMD Stock Price History.csv
-    #Apple Stock Price History.csv
-    #Delta Air Lines Stock Price History.csv
-    #Duke Energy Stock Price History.csv
-    #Meta Platforms Stock Price History.csv
-    #Moderna Stock Price History.csv
-    #Pfizer Stock Price History.csv
-    #Tesla Stock Price History.csv
-    ta = TechnicalAnalysis("Duke Energy Stock Price History.csv")
-    ta.calculate_indicators()
-    ta.generate_signals()
-    if USE_TREE:
-        ta.train_tree_model(model_type=MODEL_TYPE, in_start=IN_SAMPLE_START, in_end=IN_SAMPLE_END)
-        ta.backtest_model_predictions(out_start=OUT_SAMPLE_START, out_end=OUT_SAMPLE_END)
-    else:
-        ta.backtest(start_date=OUT_SAMPLE_START, end_date=OUT_SAMPLE_END)
+    folder_path = "/Users/a12205/Desktop/美国实习/Data Source"
+    output_path = "/Users/a12205/Desktop/美国实习/Output"
+    file_list = [f for f in os.listdir(folder_path) if f.endswith(".csv")]
 
-    ta.plot('price')
-    ta.plot('macd')
-    ta.plot('rsi')
-    ta.plot('candlestick')
+    for file_name in file_list:
+        file_path = os.path.join(folder_path, file_name)
+        ticker = file_name.split(" Stock")[0].strip().lower().replace(".", "")
+
+        ta = TechnicalAnalysis(file_path)
+        ta.calculate_indicators()
+        ta.generate_signals()
+
+        if USE_TREE:
+            ta.train_tree_model(model_type=MODEL_TYPE, in_start=IN_SAMPLE_START, in_end=IN_SAMPLE_END)
+            ta.backtest_model_predictions(out_start=OUT_SAMPLE_START, out_end=OUT_SAMPLE_END)
+        else:
+            ta.backtest(start_date=OUT_SAMPLE_START, end_date=OUT_SAMPLE_END)
+
+        ta.evaluate_strategy_results(initial_cash=INITIAL_CASH, filename_prefix=ticker, output_path=output_path)
