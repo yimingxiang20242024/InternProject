@@ -1,5 +1,5 @@
 # Overview
-This script reads NVIDIA stock price data from an Excel file and generates a time-series plot of stock prices over time.
+This script reads stock price data from an Excel file and generates a time-series plot of stock prices over time.
 
 ## Requirements
 Make sure you have the following Python libraries installed:
