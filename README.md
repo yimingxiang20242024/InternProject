@@ -1,5 +1,7 @@
 # Overview
-This script reads stock price data from an Excel file and generates a time-series plot of stock prices over time.
+The project consists of two part. The first part is Technical Analysis, which reads stock price data from an Excel file and generates a time-series plot of stock prices over time. The second part is Muti-Factor Analysis, which reads fundamental and technical factors and stock returns data, generating a linear relationship between factors and return, and using the model to give score to each stock which gennerate the portfolio.
+
+# First Part: Technical Analysis
 
 ## Requirements
 Make sure you have the following Python libraries installed:
@@ -92,6 +94,9 @@ flowchart TD
     H --> I
     I --> Z[End]
 ```
+
+# Second Part: Muti-Factor Analysis
+
 
 
 ## End
