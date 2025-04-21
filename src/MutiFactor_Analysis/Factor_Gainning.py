@@ -1,5 +1,8 @@
 import os
 import pandas as pd
+import yfinance as yf
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
 # Define folder paths
 fundamental_path = "Fundamental_Factors"
@@ -105,8 +108,6 @@ OOS = filtered_merged_factors.iloc[131:131+59]
 print(f"✅ INS shape: {INS.shape}")
 print(f"✅ OOS shape: {OOS.shape}")
 
-import os
-
 # Output directories
 ins_path = "/Users/a12205/Desktop/美国实习/INS"
 oos_path = "/Users/a12205/Desktop/美国实习/OOS"
@@ -132,11 +133,6 @@ for factor in factor_names:
     print(f"✅ Saved {filename}")
 
 print("🎉 All factor files (INS and OOS) exported successfully.")
-
-import os
-import yfinance as yf
-import numpy as np
-import pandas as pd
 
 # Output paths
 ins_path = "/Users/a12205/Desktop/美国实习/INS"
@@ -189,11 +185,6 @@ oos_df.to_csv(os.path.join(oos_path, "returns.csv"))
 print("✅ Log returns saved successfully:")
 print(f"📁 INS: {ins_path}/returns.csv ({ins_df.shape[0]} rows)")
 print(f"📁 OOS: {oos_path}/returns.csv ({oos_df.shape[0]} rows)")
-
-import yfinance as yf
-import numpy as np
-import pandas as pd
-from sklearn.linear_model import LinearRegression
 
 # === Step 1: Your existing stock log returns ===
 # Assume return_df is already a DataFrame with dates as index and stock tickers as columns
