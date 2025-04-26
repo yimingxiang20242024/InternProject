@@ -157,23 +157,17 @@ pip install pandas numpy matplotlib scikit-learn statsmodels yfinance openpyxl
 
 # Workflow
 
-Load Fundamental and Technical Factors
-↓
-Data Cleaning and Standardization
-↓
-Single Factor Testing
-↓
-Collinearity Analysis
-↓
-Factor Combination
-↓
-Multi-Factor Model Training
-↓
-Predict Stock Scores
-↓
-Portfolio Construction (Long-Short)
-↓
-Backtesting and Evaluation
+```mermaid
+flowchart TD
+    A[Load Fundamental and Technical Factors] --> B[Data Cleaning and Standardization]
+    B --> C[Single Factor Testing]
+    C --> D[Collinearity Analysis]
+    D --> E[Factor Combination]
+    E --> F[Multi-Factor Model Training]
+    F --> G[Predict Stock Scores]
+    G --> H[Portfolio Construction (Long-Short)]
+    H --> I[Backtesting and Evaluation]
+```
 
 
 ## End
