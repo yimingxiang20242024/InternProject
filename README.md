@@ -106,8 +106,9 @@ The goal is to **identify alpha-generating factors**, **build a predictive model
 ## Requirements
 Make sure you have the following Python libraries installed:
 
-```bash
+```
 pip install pandas numpy matplotlib scikit-learn statsmodels yfinance openpyxl
+```
 
 How to Use
 Place your Fundamental Factors and Technical Factors CSV files into a designated folder (/factors/).
