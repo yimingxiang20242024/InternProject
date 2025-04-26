@@ -95,29 +95,30 @@ flowchart TD
     I --> Z[End]
 ```
 
-# Second Part: Muti-Factor Analysis
-Second Part: Multi-Factor Analysis
-Overview
-The Multi-Factor Analysis module builds a systematic stock selection and portfolio prediction model by combining multiple financial and technical indicators.
-The goal is to identify alpha-generating factors, build a predictive model for returns, and simulate long-short portfolios to validate performance.
+# Second Part: Multi-Factor Analysis
 
-Requirements
+## Overview
+The Multi-Factor Analysis module builds a systematic stock selection and portfolio prediction model by combining multiple financial and technical indicators.  
+The goal is to **identify alpha-generating factors**, **build a predictive model** for returns, and **simulate long-short portfolios** to validate performance.
+
+---
+
+## Requirements
 Make sure you have the following Python libraries installed:
 
-bash
-复制
-编辑
+```bash
 pip install pandas numpy matplotlib scikit-learn statsmodels yfinance openpyxl
+
 How to Use
-Place your Fundamental Factors and Technical Factors CSV files in a designated folder (/factors/).
+Place your Fundamental Factors and Technical Factors CSV files into a designated folder (/factors/).
 
-Place your stock returns CSV (returns.csv) in the same project directory.
+Place your stock returns CSV file (returns.csv) into the project root directory.
 
-Run the pipeline step-by-step following the modules:
+Execute the following pipeline step-by-step:
 
 Step 1: Factor Gathering and Cleaning
 
-Step 2: Single Factor Testing (IC, RankIC, Long-Short Testing)
+Step 2: Single Factor Testing (IC, Rank IC, Long-Short Testing)
 
 Step 3: Collinearity Analysis
 
@@ -136,7 +137,7 @@ matplotlib – Data visualization
 
 scikit-learn – Preprocessing and regression modeling
 
-statsmodels – Cross-sectional regression, neutralization
+statsmodels – Cross-sectional regression and neutralization
 
 yfinance – (Optional) Real-time stock data fetching
 
@@ -153,84 +154,89 @@ factor_combination.py	Merge thematically similar factors into composite indicato
 multi_factor_model.py	Train cross-sectional linear models for daily return prediction.
 backtesting.py	Simulate long-short portfolios based on model predictions.
 Workflow
-mermaid
+text
 复制
 编辑
-flowchart TD
-    A[Load Fundamental and Technical Factors] --> B[Data Cleaning and Standardization]
-    B --> C[Single Factor Testing]
-    C --> D[Collinearity Analysis]
-    D --> E[Factor Combination]
-    E --> F[Multi-Factor Model Training]
-    F --> G[Predict Stock Scores]
-    G --> H[Portfolio Construction (Long-Short)]
-    H --> I[Backtesting and Evaluation]
+Load Fundamental and Technical Factors
+↓
+Data Cleaning and Standardization
+↓
+Single Factor Testing
+↓
+Collinearity Analysis
+↓
+Factor Combination
+↓
+Multi-Factor Model Training
+↓
+Predict Stock Scores
+↓
+Portfolio Construction (Long-Short)
+↓
+Backtesting and Evaluation
 Modeling Strategy
-Factor Preprocessing:
-
+Factor Preprocessing
 Winsorize extreme values (2.5% - 97.5%).
 
-Neutralize against residual volatility.
+Neutralize against residual volatility (resivol).
 
-Standardize (z-scoring) for cross-sectional comparability.
+Standardize factors using z-scoring.
 
-Single Factor Screening:
+Single Factor Screening
+Calculate daily Information Coefficient (IC) and Rank IC.
 
-Analyze daily IC (Pearson correlation) and Rank IC (Spearman correlation).
+Perform long-short simulation based on factor ranking.
 
-Perform long-short simulation per factor.
+Select top-performing factors based on IC stability and long-short return.
 
-Select top factors based on IC stability and portfolio returns.
+Collinearity Control
+Analyze factor beta correlations and cross-sectional correlations.
 
-Multicollinearity Control:
+Remove or combine highly correlated factors to improve model robustness.
 
-Analyze cross-factor beta correlations.
+Multi-Factor Model
+Train daily cross-sectional OLS regressions on in-sample (INS) data.
 
-Remove or combine highly correlated factors.
+Predict out-of-sample (OOS) stock returns using averaged model coefficients.
 
-Multi-Factor Model:
+Normalize predicted stock scores to maintain market neutrality.
 
-Train cross-sectional OLS regressions daily on in-sample (INS) data.
+Portfolio Backtesting
+Long top-N scoring stocks and short bottom-N scoring stocks daily.
 
-Predict out-of-sample (OOS) daily stock returns.
+Equal weighting within long and short legs.
 
-Normalize predictions for market neutrality.
-
-Portfolio Backtesting:
-
-Daily long top-N and short bottom-N scoring stocks.
-
-Equal weight within long and short legs.
-
-Track long-short PnL, calculate Sharpe ratio, max drawdown, volatility.
+Evaluate portfolio returns, Sharpe ratio, maximum drawdown, and volatility.
 
 Outputs
-cleaned_factors/ – Cleaned, standardized factor matrices.
+/cleaned_factors/ — Cleaned and standardized factor datasets
 
-single_factor_reports/ – IC plots, long-short PnL plots for each factor.
+/single_factor_reports/ — IC and long-short return plots for each factor
 
-collinearity_analysis/ – Correlation heatmaps and reports.
+/collinearity_analysis/ — Correlation heatmaps and collinearity analysis
 
-combined_factors/ – Composite factor files.
+/combined_factors/ — Composite factor files after merging
 
-multi_factor_predictions/ – Predicted return scores (OOS).
+/multi_factor_predictions/ — Out-of-sample predicted stock return scores
 
-backtesting_results/ – Long-short portfolio returns and summary metrics.
+/backtesting_results/ — Long-short portfolio returns and performance statistics
 
 Key Performance Metrics
-Information Coefficient (IC)
+Information Coefficient (IC) – Measures correlation between factor scores and future returns.
 
-Rank Information Coefficient (Rank IC)
+Rank Information Coefficient (Rank IC) – Rank-based IC.
 
-Annualized Return
+Annualized Return – Compounded yearly portfolio return.
 
-Annualized Volatility
+Annualized Volatility – Yearly standard deviation of returns.
 
-Sharpe Ratio
+Sharpe Ratio – Return-to-risk ratio.
 
-Maximum Drawdown
+Maximum Drawdown – Largest peak-to-trough decline.
 
-Win Rate (daily positive returns)
+Daily Win Rate – Percentage of days with positive long-short returns.
+
+
 
 
 ## End
