@@ -110,54 +110,53 @@ Make sure you have the following Python libraries installed:
 pip install pandas numpy matplotlib scikit-learn statsmodels yfinance openpyxl
 ```
 
-How to Use
-Place your Fundamental Factors and Technical Factors CSV files into a designated folder (/factors/).
+## How to Use
+1.Place your Fundamental Factors and Technical Factors CSV files into a designated folder (/factors/).
 
-Place your stock returns CSV file (returns.csv) into the project root directory.
+2.Place your stock returns CSV file (returns.csv) into the project root directory.
 
-Execute the following pipeline step-by-step:
+3.Execute the following pipeline step-by-step:
 
-Step 1: Factor Gathering and Cleaning
+-Step 1: Factor Gathering and Cleaning
 
-Step 2: Single Factor Testing (IC, Rank IC, Long-Short Testing)
+-Step 2: Single Factor Testing (IC, Rank IC, Long-Short Testing)
 
-Step 3: Collinearity Analysis
+-Step 3: Collinearity Analysis
 
-Step 4: Factor Combination
+-Step 4: Factor Combination
 
-Step 5: Multi-Factor Modeling and Prediction
+-Step 5: Multi-Factor Modeling and Prediction
 
-Step 6: Portfolio Backtesting and Evaluation
+-Step 6: Portfolio Backtesting and Evaluation
 
-Packages Used
-pandas – Data loading and manipulation
+## Packages Used
+-pandas – Data loading and manipulation
 
-numpy – Mathematical operations
+-numpy – Mathematical operations
 
-matplotlib – Data visualization
+-matplotlib – Data visualization
 
-scikit-learn – Preprocessing and regression modeling
+-scikit-learn – Preprocessing and regression modeling
 
-statsmodels – Cross-sectional regression and neutralization
+-statsmodels – Cross-sectional regression and neutralization
 
-yfinance – (Optional) Real-time stock data fetching
+-yfinance – (Optional) Real-time stock data fetching
 
-openpyxl – Excel file handling
+-openpyxl – Excel file handling
 
-Modules Description
+# Modules Description
 
-Module	Purpose
-factor_gathering.py	Load and align raw factor data into standardized matrices.
-data_processing.py	Winsorize, neutralize (vs. resivol), and z-score standardize factors.
-single_factor_testing.py	Evaluate individual factor predictive power (IC, RankIC, Long-Short PnL).
-collinearity_analysis.py	Check and visualize factor multicollinearity.
-factor_combination.py	Merge thematically similar factors into composite indicators.
-multi_factor_model.py	Train cross-sectional linear models for daily return prediction.
-backtesting.py	Simulate long-short portfolios based on model predictions.
-Workflow
-text
-复制
-编辑
+## Module Purpose
+-factor_gathering.py	Load and align raw factor data into standardized matrices.
+-data_processing.py	Winsorize, neutralize (vs. resivol), and z-score standardize factors.
+-single_factor_testing.py	Evaluate individual factor predictive power (IC, RankIC, Long-Short PnL).
+-collinearity_analysis.py	Check and visualize factor multicollinearity.
+-factor_combination.py	Merge thematically similar factors into composite indicators.
+-multi_factor_model.py	Train cross-sectional linear models for daily return prediction.
+-backtesting.py	Simulate long-short portfolios based on model predictions.
+
+# Workflow
+
 Load Fundamental and Technical Factors
 ↓
 Data Cleaning and Standardization
@@ -175,69 +174,6 @@ Predict Stock Scores
 Portfolio Construction (Long-Short)
 ↓
 Backtesting and Evaluation
-Modeling Strategy
-Factor Preprocessing
-Winsorize extreme values (2.5% - 97.5%).
-
-Neutralize against residual volatility (resivol).
-
-Standardize factors using z-scoring.
-
-Single Factor Screening
-Calculate daily Information Coefficient (IC) and Rank IC.
-
-Perform long-short simulation based on factor ranking.
-
-Select top-performing factors based on IC stability and long-short return.
-
-Collinearity Control
-Analyze factor beta correlations and cross-sectional correlations.
-
-Remove or combine highly correlated factors to improve model robustness.
-
-Multi-Factor Model
-Train daily cross-sectional OLS regressions on in-sample (INS) data.
-
-Predict out-of-sample (OOS) stock returns using averaged model coefficients.
-
-Normalize predicted stock scores to maintain market neutrality.
-
-Portfolio Backtesting
-Long top-N scoring stocks and short bottom-N scoring stocks daily.
-
-Equal weighting within long and short legs.
-
-Evaluate portfolio returns, Sharpe ratio, maximum drawdown, and volatility.
-
-Outputs
-/cleaned_factors/ — Cleaned and standardized factor datasets
-
-/single_factor_reports/ — IC and long-short return plots for each factor
-
-/collinearity_analysis/ — Correlation heatmaps and collinearity analysis
-
-/combined_factors/ — Composite factor files after merging
-
-/multi_factor_predictions/ — Out-of-sample predicted stock return scores
-
-/backtesting_results/ — Long-short portfolio returns and performance statistics
-
-Key Performance Metrics
-Information Coefficient (IC) – Measures correlation between factor scores and future returns.
-
-Rank Information Coefficient (Rank IC) – Rank-based IC.
-
-Annualized Return – Compounded yearly portfolio return.
-
-Annualized Volatility – Yearly standard deviation of returns.
-
-Sharpe Ratio – Return-to-risk ratio.
-
-Maximum Drawdown – Largest peak-to-trough decline.
-
-Daily Win Rate – Percentage of days with positive long-short returns.
-
-
 
 
 ## End
