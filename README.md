@@ -155,19 +155,4 @@ pip install pandas numpy matplotlib scikit-learn statsmodels yfinance openpyxl
 -multi_factor_model.py	Train cross-sectional linear models for daily return prediction.
 -backtesting.py	Simulate long-short portfolios based on model predictions.
 
-# Workflow
-
-```mermaid
-flowchart TD
-    A[Load Fundamental and Technical Factors] --> B[Data Cleaning and Standardization]
-    B --> C[Single Factor Testing]
-    C --> D[Collinearity Analysis]
-    D --> E[Factor Combination]
-    E --> F[Multi-Factor Model Training]
-    F --> G[Predict Stock Scores]
-    G --> H[Portfolio Construction (Long-Short)]
-    H --> I[Backtesting and Evaluation]
-```
-
-
 ## End
