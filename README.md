@@ -96,7 +96,141 @@ flowchart TD
 ```
 
 # Second Part: Muti-Factor Analysis
+Second Part: Multi-Factor Analysis
+Overview
+The Multi-Factor Analysis module builds a systematic stock selection and portfolio prediction model by combining multiple financial and technical indicators.
+The goal is to identify alpha-generating factors, build a predictive model for returns, and simulate long-short portfolios to validate performance.
 
+Requirements
+Make sure you have the following Python libraries installed:
+
+bash
+复制
+编辑
+pip install pandas numpy matplotlib scikit-learn statsmodels yfinance openpyxl
+How to Use
+Place your Fundamental Factors and Technical Factors CSV files in a designated folder (/factors/).
+
+Place your stock returns CSV (returns.csv) in the same project directory.
+
+Run the pipeline step-by-step following the modules:
+
+Step 1: Factor Gathering and Cleaning
+
+Step 2: Single Factor Testing (IC, RankIC, Long-Short Testing)
+
+Step 3: Collinearity Analysis
+
+Step 4: Factor Combination
+
+Step 5: Multi-Factor Modeling and Prediction
+
+Step 6: Portfolio Backtesting and Evaluation
+
+Packages Used
+pandas – Data loading and manipulation
+
+numpy – Mathematical operations
+
+matplotlib – Data visualization
+
+scikit-learn – Preprocessing and regression modeling
+
+statsmodels – Cross-sectional regression, neutralization
+
+yfinance – (Optional) Real-time stock data fetching
+
+openpyxl – Excel file handling
+
+Modules Description
+
+Module	Purpose
+factor_gathering.py	Load and align raw factor data into standardized matrices.
+data_processing.py	Winsorize, neutralize (vs. resivol), and z-score standardize factors.
+single_factor_testing.py	Evaluate individual factor predictive power (IC, RankIC, Long-Short PnL).
+collinearity_analysis.py	Check and visualize factor multicollinearity.
+factor_combination.py	Merge thematically similar factors into composite indicators.
+multi_factor_model.py	Train cross-sectional linear models for daily return prediction.
+backtesting.py	Simulate long-short portfolios based on model predictions.
+Workflow
+mermaid
+复制
+编辑
+flowchart TD
+    A[Load Fundamental and Technical Factors] --> B[Data Cleaning and Standardization]
+    B --> C[Single Factor Testing]
+    C --> D[Collinearity Analysis]
+    D --> E[Factor Combination]
+    E --> F[Multi-Factor Model Training]
+    F --> G[Predict Stock Scores]
+    G --> H[Portfolio Construction (Long-Short)]
+    H --> I[Backtesting and Evaluation]
+Modeling Strategy
+Factor Preprocessing:
+
+Winsorize extreme values (2.5% - 97.5%).
+
+Neutralize against residual volatility.
+
+Standardize (z-scoring) for cross-sectional comparability.
+
+Single Factor Screening:
+
+Analyze daily IC (Pearson correlation) and Rank IC (Spearman correlation).
+
+Perform long-short simulation per factor.
+
+Select top factors based on IC stability and portfolio returns.
+
+Multicollinearity Control:
+
+Analyze cross-factor beta correlations.
+
+Remove or combine highly correlated factors.
+
+Multi-Factor Model:
+
+Train cross-sectional OLS regressions daily on in-sample (INS) data.
+
+Predict out-of-sample (OOS) daily stock returns.
+
+Normalize predictions for market neutrality.
+
+Portfolio Backtesting:
+
+Daily long top-N and short bottom-N scoring stocks.
+
+Equal weight within long and short legs.
+
+Track long-short PnL, calculate Sharpe ratio, max drawdown, volatility.
+
+Outputs
+cleaned_factors/ – Cleaned, standardized factor matrices.
+
+single_factor_reports/ – IC plots, long-short PnL plots for each factor.
+
+collinearity_analysis/ – Correlation heatmaps and reports.
+
+combined_factors/ – Composite factor files.
+
+multi_factor_predictions/ – Predicted return scores (OOS).
+
+backtesting_results/ – Long-short portfolio returns and summary metrics.
+
+Key Performance Metrics
+Information Coefficient (IC)
+
+Rank Information Coefficient (Rank IC)
+
+Annualized Return
+
+Annualized Volatility
+
+Sharpe Ratio
+
+Maximum Drawdown
+
+Win Rate (daily positive returns)
 
 
 ## End
